@@ -1,0 +1,27 @@
+# Dockerfile for Data Processing Script
+FROM python:3.13
+
+# Set working directory
+WORKDIR /app
+
+# Copy needed files
+COPY ../../requirement.txt .
+
+COPY src/data_processing/pipeline.py .
+
+COPY ../../.env  .env
+
+COPY src/data_processing/entrypoint.sh /entrypoint.sh
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirement.txt
+
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
+
+
+# Command to run the data processing script
+# CMD ["sh", "-c", "python pipeline.py && tail -f /dev/null"]
+
+# CMD ["python", "pipeline.py"]

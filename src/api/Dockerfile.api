@@ -1,0 +1,24 @@
+FROM python:3.13
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements file
+COPY ../../requirement.txt .
+
+COPY src/api/api.py .
+
+# Copy the .env file
+COPY ../../.env .env
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirement.txt
+
+# Copy the FastAPI application code
+
+
+# Expose the port FastAPI runs on
+EXPOSE 8000
+
+# Command to run the FastAPI application
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
