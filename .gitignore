@@ -2,3 +2,5 @@ envc
 obsolete
 envc
 service.yml
+.git
+.gitignore
