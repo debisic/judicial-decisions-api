@@ -3,8 +3,8 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - dev
-  workflow_dispatch:
+      - main
+  # workflow_dispatch:
 
 env:
   REGISTRY: docker.io
