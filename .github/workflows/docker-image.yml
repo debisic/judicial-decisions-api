@@ -1,0 +1,35 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  IMAGE_API: ${{ secrets.DOCKER_USERNAME }}/api-service
+  IMAGE_DP: ${{ secrets.DOCKER_USERNAME }}/data-processing
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build API image
+      run: docker build -t $IMAGE_API -f src/api/Dockerfile .
+
+    - name: Build Data Processing image
+      run: docker build -t $IMAGE_DP -f src/data_processing/Dockerfile .
+
+    - name: Push API image
+      run: docker push $IMAGE_API
+
+    - name: Push Data Processing image
+      run: docker push $IMAGE_DP
