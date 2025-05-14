@@ -29,10 +29,10 @@ jobs:
 
 
     - name: Build API image
-      run: docker build -t $IMAGE_API -f src/api/Dockerfile .
+      run: docker build -t $IMAGE_API -f src/api/Dockerfile.api .
 
     - name: Build Data Processing image
-      run: docker build -t $IMAGE_DP -f src/data_processing/Dockerfile '
+      run: docker build -t $IMAGE_DP -f src/data_processing/Dockerfile.proc .
 
     - name: Push API image
       run: docker push $IMAGE_API
