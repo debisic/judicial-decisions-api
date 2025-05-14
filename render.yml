@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: my-api-service
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./src/api/Dockerfile.api
+    autoDeploy: true
+    branch: main
+
