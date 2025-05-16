@@ -42,7 +42,7 @@ def get_db():
 
 def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
     '''Authenticate the user using HTTP Basic Auth.'''
-    logging.info("Authenticating user: %s", credentials.username)
+    # logging.info("Authenticating user: %s", credentials.username)
     if credentials.username in users and users[credentials.username] == credentials.password:
         return credentials.username
     raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -81,13 +81,7 @@ def get_decisions(
         """)
         # Add wildcards around the search term for the ILIKE comparison.
         result = db.execute(query, {"search": search, "pattern": f"%{search}%"}).fetchall()
-    # elif chambre:
-    #     # Filter by chambre
-    #     query = text(
-    #         "SELECT text_id, titre, \
-    #             chambre FROM court_history \
-    #             WHERE TRIM(chambre) ILIKE:chambre")
-    #     result = db.execute(query, {"chambre": chambre}).fetchall()
+ 
     elif chambre:
         if chambre.lower() == "empty" or chambre.lower() == "null":
         # Query for rows where chambre is NULL or an empty string
@@ -126,7 +120,6 @@ def get_decision_content(
     result = db.execute(query, {"text_id": text_id}).fetchone()
     if result is None:
         raise HTTPException(status_code=404, detail="Decision not found")
-    # return {"text_id": text_id, "contenu": result['contenu']}
     return {"text_id": text_id, "contenu": result[0]}
 
 
