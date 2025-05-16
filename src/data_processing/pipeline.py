@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 load_dotenv()
 DB_USER = os.getenv("POSTGRES_USER")
@@ -31,13 +31,6 @@ DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 DB_HOST = os.getenv("POSTGRES_HOST")
 DB_PORT = os.getenv("POSTGRES_PORT")
 DB_NAME = os.getenv("POSTGRES_DB")
-print(
-    f"DB_USER={DB_USER}, \
-    DB_PASSWORD={DB_PASSWORD}, \
-    DB_HOST={DB_HOST}, \
-    DB_PORT={DB_PORT}, \
-    DB_NAME={DB_NAME}"
-    )
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 PROCESSED_LINKS_FILE = "processed_links.txt"
@@ -67,24 +60,24 @@ def download_file(url, dest_folder):
         if not os.path.exists(dest_folder):
             os.makedirs(dest_folder)
         local_filename = os.path.join(dest_folder, os.path.basename(url))
-        with requests.get(url, stream=True, timeout=10) as r:
+        with requests.get(url, stream=True, timeout=30) as r:
             r.raise_for_status()
             with open(local_filename, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-        logging.info("Downloaded file: %s", local_filename)
+        # logging.info("Downloaded file: %s", local_filename)
         return local_filename
     except requests.Timeout:
-        logging.error("Download timed out: %s", url)
+        logging.error("Download timed out: %s", url.split('/')[-1])
         return None
     except requests.ConnectionError as e:
-        logging.error("Connection error while downloading %s: %s", url, e)
+        logging.error("Connection error while downloading %s: %s", url.split('/')[-1], e)
         return None
     except requests.RequestException as e:
-        logging.error("Error downloading file %s: %s", url, e)
+        logging.error("Error downloading file %s: %s", url.split('/')[-1], e)
         return None
     except OSError as e:
-        logging.error("OS error while saving file %s: %s", url, e)
+        logging.error("OS error while saving file %s: %s", url.split('/')[-1], e)
         return None
 
 
@@ -95,7 +88,7 @@ def extract_tar_gz(tar_gz_path, extract_folder):
             os.makedirs(extract_folder)
         with tarfile.open(tar_gz_path, 'r:gz') as tar:
             tar.extractall(path=extract_folder)
-        logging.info("Extracted %s to %s", tar_gz_path, extract_folder)
+        # logging.info("Extracted %s to %s", tar_gz_path, extract_folder)
     except FileNotFoundError as e:
         logging.error("File not found: %s. Error: %s", tar_gz_path, e)
     except tarfile.TarError as e:
@@ -219,7 +212,10 @@ def main():
     '''Main function that orchestrates the entire process.'''
     logging.info("====Starting the pipeline====")
     start_time = time.time()
-    base_url = "https://echanges.dila.gouv.fr/OPENDATA/CASS/"
+    base_url = os.getenv("BASE_URL")
+    if not base_url:
+        logging.error("Base URL not set in environment variables.")
+        return
     dest_folder = "downloads"
     extract_folder = "extracted_files"
 
@@ -253,10 +249,10 @@ def main():
 
         for link in tar_gz_links:
             if link in processed_links:
-                logging.info("Skipping already processed link: %s", link)
+                logging.info("Skipping already processed link: %s", link.split('/')[-1])
                 continue
 
-            logging.info("====Processing file====: %s", link)
+            logging.info("====Processing file====: %s", link.split('/')[-1])
             tar_gz_path = download_file(link, dest_folder)
             if tar_gz_path:
                 extract_tar_gz(tar_gz_path, extract_folder)
