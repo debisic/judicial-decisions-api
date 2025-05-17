@@ -73,15 +73,15 @@ def get_decisions(
         # Full-text search on titre and chambre OR substring search on contenu
         query = text("""
             SELECT text_id, titre, chambre, 
-                   ts_rank(to_tsvector('english', titre || ' ' || chambre), plainto_tsquery(:search)) AS relevance
+                   ts_rank(to_tsvector('french', titre || ' ' || chambre), plainto_tsquery(:search)) AS relevance
             FROM court_history
-            WHERE (to_tsvector('english', titre || ' ' || chambre) @@ plainto_tsquery(:search))
+            WHERE (to_tsvector('french', titre || ' ' || chambre) @@ plainto_tsquery(:search))
                OR (contenu::text ILIKE :pattern)
             ORDER BY relevance DESC
         """)
         # Add wildcards around the search term for the ILIKE comparison.
         result = db.execute(query, {"search": search, "pattern": f"%{search}%"}).fetchall()
- 
+
     elif chambre:
         if chambre.lower() == "empty" or chambre.lower() == "null":
         # Query for rows where chambre is NULL or an empty string
