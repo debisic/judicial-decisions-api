@@ -1,5 +1,5 @@
 # Dockerfile for Data Processing Script
-FROM python:3.13
+FROM python:3.10
 
 # Set working directory
 WORKDIR /app
